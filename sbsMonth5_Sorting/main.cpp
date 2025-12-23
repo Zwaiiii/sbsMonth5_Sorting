@@ -1,15 +1,14 @@
-#include "priority_Queue.h"
+#include "Graph.h"
 
 int main()
 {
-	priority_Queue pq;
-	pq.insert(3, 3);
-	pq.insert(5, 5);
-	pq.insert(1, 2);
-	pq.insert(7, 6);
-	pq.insert(6, 4);
+	Graph g;
 
-	pq.front();
-	pq.pop();
-	pq.front();
+	g.InitializeGraph(3);
+	g.AddEdge(0, 1, 100);
+	g.AddEdge(0, 2, 1);
+	g.AddEdge(2, 1, 1);
+
+	g.Dijkstra(0, 1);
+
 }
