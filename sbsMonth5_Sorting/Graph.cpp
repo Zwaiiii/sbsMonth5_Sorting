@@ -97,23 +97,27 @@ void Graph::Dijkstra(int start, int end)
 
     vector<int> dp(count, INT_MAX); // 각각 노드까지의 거리를 저장할 배열
     dp[start] = 0;
-    Node* temp;
 
     vector<bool> visited(count, false);
     int now = start;
+    int cnt = 0;
 
-    while(true)
-    {
-        if(visited[now] == false) {
-            temp = graph[now];
-            visited[now] = true;
-            while (temp != nullptr) {
-                // 가중치 낮은값부터 다음으로 찾아야하함.
-                dp[temp->data] = dp[temp->data] <= dp[now] + temp->weight ? dp[temp->data] : dp[now] + temp->weight;
+    while(cnt != count) {
+        if (visited[now] == false) {
+            int nextNode = INT_MAX;
+            Node* temp = graph[now];
+            if (temp != nullptr) {
+                dp[temp->data] = dp[temp->data] <= dp[now] + temp->weight ? dp[temp->data] : dp[now + temp->weight];
+                nextNode = dp[temp->data] <= dp[nextNode] ? temp->data : nextNode;
                 temp = temp->next;
             }
+            now = nextNode;
+            visited[now] = true;
+            cnt++;
         }
     }
+
+    
 
     cout << dp[end] << endl;
 }
