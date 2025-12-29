@@ -14,7 +14,8 @@ struct Node {
 	int x;
 	int weight;
 	int count;
-
+	vector<vector<int>> currentBoard;
+	Node() { currentBoard.assign(3, vector<int>(3)); }
 	bool operator<(const Node& other) const {
 		return weight > other.weight;
 	}
@@ -40,6 +41,8 @@ int main() {
 	int n;
 	cin >> n;
 
+	vector<int> result;
+
 	pair<int, int> start;
 	for (int test = 0; test < n; test++) {
 		/////// 보드 입력, 시작점 입력
@@ -61,8 +64,9 @@ int main() {
 		
 		int w = 0;
 
-		while(!pq.empty() && w == 0){
+		while(!pq.empty()){
 			auto node = pq.top(); pq.pop();
+			bool flag = false;
 
 			vector<pair<int,int>> direc = {{1,0}, {-1,0}, {0,1}, {0,-1}};
 			
@@ -72,15 +76,17 @@ int main() {
 				if (x >= 0 && x < 3 && y >= 0 && y < 3) {
 					w = checkWeight(x, y, node.x, node.y);
 					if (w == 9) {
-						cout << node.count + 1;
+						result.push_back(node.count + 1);
+						flag = true;
 						break;
 					}
 					else pq.push({ y, x, w, node.count + 1 });
 				}
 				w = 0;
 			}
+			if (flag == true) break;
 		}
-
 	}
+	for (int i : result) cout << i << "\n";
 }
 
