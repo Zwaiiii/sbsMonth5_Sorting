@@ -99,26 +99,26 @@ void Graph::Dijkstra(int start, int end)
     dp[start] = 0;
 
     vector<bool> visited(count, false);
-    int now = start;
-    int cnt = 0;
+    
+    priority_queue<pqNode> pq;
+    pq.push({ start, 0 });
 
-    while(cnt != count) {
-        if (visited[now] == false) {
-            int nextNode = INT_MAX;
-            Node* temp = graph[now];
-            if (temp != nullptr) {
-                dp[temp->data] = dp[temp->data] <= dp[now] + temp->weight ? dp[temp->data] : dp[now + temp->weight];
-                nextNode = dp[temp->data] <= dp[nextNode] ? temp->data : nextNode;
+    while (!pq.empty()) {
+        auto now = pq.top(); pq.pop();
+
+        if (visited[now.v] == false) {
+            Node* temp = graph[now.v];
+            while (temp != nullptr) {
+                if (!visited[temp->data] && (now.d + temp->weight <= dp[temp->data])) {
+                    pq.push({ temp->data, now.d + temp->weight });
+                }
                 temp = temp->next;
             }
-            now = nextNode;
-            visited[now] = true;
-            cnt++;
+            visited[now.v] = true;
+            dp[now.v] = now.d;
         }
     }
-
-    
-
+   
     cout << dp[end] << endl;
 }
 

@@ -13,6 +13,13 @@ struct Node
 	Node* next;
 };
 
+struct pqNode {
+	int v;
+	int d;
+	bool operator<(const pqNode& other) const {
+		return d > other.d;
+	}
+};
 class Graph
 {
 private:
