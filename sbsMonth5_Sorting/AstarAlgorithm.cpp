@@ -10,28 +10,29 @@ vector<vector<int>> board(3, vector<int>(3));
 vector<vector<int>> const answer = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 0 } };
 
 struct Node {
-	int y;
+	vector<vector<int>> curBoard;
+	int moveCount;
 	int x;
+	int y;
 	int weight;
-	int count;
-	vector<vector<int>> currentBoard;
-	Node() { currentBoard.assign(3, vector<int>(3)); }
 	bool operator<(const Node& other) const {
-		return weight > other.weight;
+		
 	}
 };
 
-int checkWeight(int bx, int by, int x, int y) {
-	SWAP(board[by][bx], board[y][x]);
-	int weight = 0;
+struct Fx {
+
+	
+};
+
+int checkWeight(vector<vector<int>> board) {
+	int flag = 9;
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			if (board[i][j] == answer[i][j]) weight++;
+			if (board[i][j] != answer[i][j]) flag--;
 		}
 	}
-	SWAP(board[by][bx], board[y][x]);
-
-	return weight;
+	return flag;
 }
 
 int main() {
@@ -41,7 +42,8 @@ int main() {
 	int n;
 	cin >> n;
 
-	vector<int> result;
+	vector<int> result; // 결과 저장용 배열
+	vector<int> check; // 불가능 판별용 배열
 
 	pair<int, int> start;
 	for (int test = 0; test < n; test++) {
@@ -55,38 +57,41 @@ int main() {
 					board[i][j] = 0;
 				}
 				else board[i][j] = s[j] - '0';
+				check.push_back(board[i][j]);
+			}
+		}
+		/////// 가능 불가능 판별
+		int sum = 0;
+		for (int i = 0; i < 9; i++) {
+			for (int j = i + 1; i < 9; i++) {
+				if (check[j] > check[i]) sum++;
+			}
+			if (sum % 2 == 1) {
+				result.push_back(-1);
+				break;
 			}
 		}
 		///////
 		priority_queue<Node> pq;
+		priority_queue<int> fx;
 
-		pq.push({ start.first, start.second, board[start.first][start.second], 0 });
-		
-		int w = 0;
+		pq.push({ board, 0, start.second, start.first, checkWeight(board) });
 
-		while(!pq.empty()){
+		while (!pq.empty()) {
 			auto node = pq.top(); pq.pop();
-			bool flag = false;
 
-			vector<pair<int,int>> direc = {{1,0}, {-1,0}, {0,1}, {0,-1}};
-			
+			vector<pair<int, int>> direc = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+
 			for (auto p : direc) {
 				int x = node.x + p.first;
 				int y = node.y + p.second;
 				if (x >= 0 && x < 3 && y >= 0 && y < 3) {
-					w = checkWeight(x, y, node.x, node.y);
-					if (w == 9) {
-						result.push_back(node.count + 1);
-						flag = true;
-						break;
-					}
-					else pq.push({ y, x, w, node.count + 1 });
+					SWAP(node.curBoard[y][x], node.curBoard[node.y][node.x]);
+					pq.push({ node.curBoard, node.moveCount + 1, x, y, checkWeight(node.curBoard) });
 				}
-				w = 0;
 			}
-			if (flag == true) break;
 		}
-	}
-	for (int i : result) cout << i << "\n";
+		
+
 }
 
