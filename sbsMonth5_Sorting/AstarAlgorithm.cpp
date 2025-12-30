@@ -8,6 +8,7 @@ using namespace std;
 
 vector<vector<int>> board(3, vector<int>(3));
 vector<vector<int>> const answer = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 0 } };
+vector<vector<int>> visited;
 
 struct Node {
 	vector<vector<int>> curBoard;
@@ -16,23 +17,31 @@ struct Node {
 	int y;
 	int weight;
 	bool operator<(const Node& other) const {
-		
+		return moveCount + weight > other.moveCount + other.weight;
 	}
-};
-
-struct Fx {
-
-	
 };
 
 int checkWeight(vector<vector<int>> board) {
-	int flag = 9;
+	int flag = 0;
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			if (board[i][j] != answer[i][j]) flag--;
+			if (board[i][j] != 0 && board[i][j] != answer[i][j]) flag++;
 		}
 	}
 	return flag;
+}
+
+bool isVisited(vector<int> board) {
+	for (vector<int> v : visited) {
+		if (v == board) return true;
+	}
+	return false;
+}
+
+vector<int> makeArray(vector<vector<int>> board) {
+	vector<int> arr;
+	for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) arr.push_back(board[i][j]);
+	return arr;
 }
 
 int main() {
@@ -63,22 +72,35 @@ int main() {
 		/////// 가능 불가능 판별
 		int sum = 0;
 		for (int i = 0; i < 9; i++) {
-			for (int j = i + 1; i < 9; i++) {
-				if (check[j] > check[i]) sum++;
+			if(check[i] != 0)
+			{
+				for (int j = i + 1; j < 9; j++) {
+					if (check[j] < check[i] && check[j] != 0) sum++;
+				}
 			}
-			if (sum % 2 == 1) {
-				result.push_back(-1);
-				break;
-			}
+		}
+		if (sum % 2 == 1) {
+			result.push_back(-1);
+			check.clear();
+			visited.clear();
+			continue;
 		}
 		///////
 		priority_queue<Node> pq;
-		priority_queue<int> fx;
 
 		pq.push({ board, 0, start.second, start.first, checkWeight(board) });
 
 		while (!pq.empty()) {
 			auto node = pq.top(); pq.pop();
+
+			vector<int> arr = makeArray(node.curBoard);
+			if (isVisited(arr)) continue;
+			visited.push_back(arr);
+
+			if (node.curBoard == answer) {
+				result.push_back(node.moveCount);
+				break;
+			}
 
 			vector<pair<int, int>> direc = { {1,0}, {-1,0}, {0,1}, {0,-1} };
 
@@ -87,11 +109,20 @@ int main() {
 				int y = node.y + p.second;
 				if (x >= 0 && x < 3 && y >= 0 && y < 3) {
 					SWAP(node.curBoard[y][x], node.curBoard[node.y][node.x]);
-					pq.push({ node.curBoard, node.moveCount + 1, x, y, checkWeight(node.curBoard) });
+					vector<int> nextArr = makeArray(node.curBoard);
+					if (!isVisited(nextArr)) {
+						pq.push({ node.curBoard, node.moveCount + 1, x, y, checkWeight(node.curBoard) });
+					}
+					SWAP(node.curBoard[y][x], node.curBoard[node.y][node.x]);
 				}
 			}
 		}
-		
-
+		check.clear();
+		visited.clear();
+	}
+	for (int i : result) {
+		if (i == -1) cout << "impossible\n";
+		else cout << i << "\n";
+	}
 }
 
