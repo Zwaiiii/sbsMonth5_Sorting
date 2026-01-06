@@ -1,6 +1,8 @@
 #include<iostream>
 #include<vector>
 #include<queue>
+#include<algorithm>
+#include<unordered_set>
 #define SWAP(a, b) {char temp = a; a = b; b = temp;}
 
 using namespace std;
@@ -11,16 +13,16 @@ struct Node {
 	int hx;
 	string board;
 	bool operator<(const Node& other) const {
-		return level + hx < other.level + other.hx;
+		return level + hx > other.level + other.hx;
 	}
 };
 
 int CalWeight(string board) {
-	int weight = 0;
+	int weight = 9;
 	string answer = "12345678#";
 
 	for (int i = 0; i < 9; i++) 
-		if (answer[i] == board[i]) weight++;
+		if (answer[i] == board[i]) weight--;
 	
 	return weight;
 }
@@ -31,11 +33,11 @@ int main() {
 	cin >> testCase;
 
 	vector<int> result;
-	vector<string> visited;
 
 	for (int i = 0; i < testCase; i++) {
 		// 판입력받기 
 		string board = "";
+		unordered_set<string> visited;
 
 		for (int j = 0; j < 3; j++) {
 			string s;
@@ -46,7 +48,7 @@ int main() {
 		//역순 계산
 
 		int chk = 0;
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < 8; i++) {
 			if (board[i] == '#') continue;
 			for (int j = i + 1; j < 9; j++) {
 				if (board[j] == '#') continue;
@@ -63,25 +65,37 @@ int main() {
 		priority_queue<Node> pq;
 		int startP = board.find("#");
 		pq.push({ startP, 0, CalWeight(board), board });
-		visited.push_back(board);
 
 		while (!pq.empty()) {
 			auto node = pq.top(); pq.pop();
-			if (node.hx == 9) {
+
+			if (visited.count(node.board)) continue;
+			visited.insert(node.board);
+
+			if (node.hx == 0) {
 				result.push_back(node.level);
 				break;
 			}
 
-			for (int i = -3; i <= 3; i = i + 2) {
+			int direc[4] = { -3, -1, 1, 3 };
+			for (int i : direc) {
 				int next = node.now + i;
-				if (next >= 0 && next <= 9) {
+				
+				bool poss = false;
+
+				if (i % 3 == 0) {
+					if (next >= 0 && next < 9) poss = true;
+				}
+				else {
+					if (next >= 0 && next < 9 && next / 3 == node.now / 3) poss = true;
+				}
+					
+				if (poss) {
 					SWAP(node.board[node.now], node.board[next]);
-					if (find(visited.begin(), visited.end(), node.board) != visited.end()) {
-						pq.push({ next, node.level + 1, CalWeight(node.board), node.board });
-						visited.push_back(node.board);
-					}
+					pq.push({ next, node.level + 1, CalWeight(node.board), node.board });
 					SWAP(node.board[node.now], node.board[next]);
 				}
+					
 			}
 		}
 	}
